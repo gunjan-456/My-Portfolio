@@ -6,7 +6,7 @@ const Navbar = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ["home", "about", "projects", "contact", "education"]
+      const sections = ["home", "about", "projects", "education", "contact"]
 
       sections.forEach((id) => {
         const section = document.getElementById(id)
@@ -30,8 +30,8 @@ const Navbar = () => {
     { name: "Home", id: "home" },
     { name: "About", id: "about" },
     { name: "Projects", id: "projects" },
-    { name: "Contact", id: "contact" },
     { name: "Education", id: "education" },
+     { name: "Contact", id: "contact" },
   ]
 
   return (
