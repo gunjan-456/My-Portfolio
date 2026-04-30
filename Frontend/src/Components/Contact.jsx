@@ -29,7 +29,7 @@ const Contact = () => {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/send", {
+      const res = await fetch("https://portfolio-rf9b.onrender.com/api/send", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
