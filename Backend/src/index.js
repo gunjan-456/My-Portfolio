@@ -1,12 +1,21 @@
 const express = require("express")
 const nodemailer = require("nodemailer")
 const cors = require("cors")
+const mongoose = require("mongoose")
 require("dotenv").config()
+
+const Contact = require("./Models/Contact")
 
 const app = express()
 
 app.use(cors())
 app.use(express.json())
+
+
+mongoose.connect(process.env.MONGO_URL)
+  .then(() => console.log("Database connected"))
+  .catch(err => console.log(err))
+
 
 app.post("/api/send", async (req, res) => {
   const { name, email, message } = req.body
@@ -15,7 +24,20 @@ app.post("/api/send", async (req, res) => {
     return res.status(400).json({ msg: "All fields required" })
   }
 
+   if (!email.includes("@")) {
+    return res.status(400).json({ msg: "Invalid email" })
+  }
+
+  if (message.length > 500) {
+    return res.status(400).json({ msg: "Message too long" })
+  }
+
+
   try {
+   
+    await Contact.create({ name, email, message })
+
+  
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -24,61 +46,44 @@ app.post("/api/send", async (req, res) => {
       },
     })
 
-    const mailOptions = {
+    await transporter.sendMail({
       from: process.env.EMAIL,
-      to: process.env.EMAIL, 
-      subject: ` New Portfolio Message from ${name}`,
-
+      to: process.env.EMAIL,
+      subject: ` New Message from ${name}`,
       html: `
-        <div style="font-family: Arial, sans-serif; background:#0a0a0a; padding:20px; color:#fff;">
-          
-          <div style="max-width:600px; margin:auto; background:#111; border-radius:10px; overflow:hidden; border:1px solid #333;">
-            
-            <!-- HEADER -->
-            <div style="background: linear-gradient(90deg, #9333ea, #ec4899, #3b82f6); padding:15px; text-align:center;">
-              <h2 style="margin:0; color:#fff;">🚀 New Portfolio Message</h2>
-            </div>
-
-            <!-- BODY -->
-            <div style="padding:20px;">
-              
-              <p style="color:#ccc; font-size:14px;">
-                You have received a new message from your portfolio website.
-              </p>
-
-              <div style="margin-top:20px; line-height:1.6;">
-                <p><strong style="color:#a78bfa;">👤 Name:</strong> ${name}</p>
-                <p><strong style="color:#f472b6;">📧 Email:</strong> ${email}</p>
-
-                <p style="margin-top:10px;">
-                  <strong style="color:#60a5fa;">💬 Message:</strong>
-                </p>
-
-                <div style="background:#1a1a1a; padding:12px; border-radius:8px; border:1px solid #333;">
-                  ${message}
-                </div>
-              </div>
-
-            </div>
-
-            <!-- FOOTER -->
-            <div style="padding:12px; text-align:center; font-size:12px; color:#888; border-top:1px solid #222;">
-              ⚡ Sent from Gunjan Singh Portfolio
-            </div>
-
+        <div style="font-family:Arial; padding:20px; background:#0a0a0a; color:#fff;">
+          <h2>New Portfolio Message</h2>
+          <p><b>Name:</b> ${name}</p>
+          <p><b>Email:</b> ${email}</p>
+          <p><b>Message:</b></p>
+          <div style="background:#111; padding:10px; border-radius:6px;">
+            ${message}
           </div>
-
         </div>
-      `,
-    }
+      `
+    })
 
-    await transporter.sendMail(mailOptions)
+    
+    await transporter.sendMail({
+      from: process.env.EMAIL,
+      to: email,
+      subject: "Thanks for contacting me 🙌",
+      html: `
+        <div style="font-family:Arial; padding:20px;">
+          <h2>Hi ${name} 👋</h2>
+          <p>Thank you for reaching out! I have received your message and will get back to you soon.</p>
+          <p>Meanwhile, you can explore my portfolio.</p>
+          <br/>
+          <p>Best Regards,<br/>Gunjan Singh</p>
+        </div>
+      `
+    })
 
-    res.status(200).json({ msg: "Email sent successfully" })
+    res.status(200).json({ msg: "Message sent & saved ✅" })
 
   } catch (error) {
     console.log(error)
-    res.status(500).json({ msg: "Server error" })
+    res.status(500).json({ msg: "Server error ❌" })
   }
 })
 
