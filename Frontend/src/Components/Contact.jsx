@@ -19,7 +19,8 @@ const Contact = () => {
     })
   }
 
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
 
     if (!formData.name || !formData.email || !formData.message) {
@@ -27,13 +28,32 @@ const Contact = () => {
       return
     }
 
-    toast.success("Message sent successfully 🚀")
+    try {
+      const res = await fetch("http://localhost:5000/api/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      })
 
-    setFormData({
-      name: "",
-      email: "",
-      message: ""
-    })
+      const data = await res.json()
+
+      if (res.ok) {
+        toast.success("Message sent successfully 🚀")
+        setFormData({
+          name: "",
+          email: "",
+          message: ""
+        })
+      } else {
+        toast.error(data.msg || "Failed to send ❌")
+      }
+
+    } catch (error) {
+      console.log(error)
+      toast.error("Server error ❌")
+    }
   }
 
   return (
@@ -49,6 +69,7 @@ const Contact = () => {
 
         <div className="grid md:grid-cols-2 gap-12">
 
+         
           <div>
             <h3 className="text-xl font-semibold mb-4">Let's Connect 👋</h3>
 
@@ -82,7 +103,6 @@ const Contact = () => {
                 <FaGithub /> GitHub
               </a>
 
-          
               <a
                 href="https://www.linkedin.com/in/gunjan-singh-3620b822a/"
                 target="_blank"
@@ -96,7 +116,7 @@ const Contact = () => {
             </div>
           </div>
 
-       
+        
           <form
             onSubmit={handleSubmit}
             className="backdrop-blur-md bg-white/10 p-6 rounded-2xl 
