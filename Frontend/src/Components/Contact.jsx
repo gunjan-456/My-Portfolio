@@ -29,7 +29,7 @@ const Contact = () => {
     }
 
     try {
-      const res = await fetch("https://portfolio-rf9b.onrender.com/api/send", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/send`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
