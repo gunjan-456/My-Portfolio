@@ -35,6 +35,7 @@ const Contact = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
+       
       })
 
       const data = await res.json()
@@ -180,3 +181,6 @@ const Contact = () => {
 }
 
 export default Contact
+
+
+ console.log(import.meta.env.VITE_API_URL)

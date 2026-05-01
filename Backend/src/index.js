@@ -9,12 +9,24 @@ const Contact = require("./Models/Contact")
 const app = express()
 
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://portfolioo-rho-gold.vercel.app"
+]
+
 app.use(cors({
-  origin: "*"
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true)
+    } else {
+      callback(new Error("Not allowed by CORS"))
+    }
+  }
 }))
+
 app.use(express.json())
 
-/
+
 mongoose.connect(process.env.MONGO_URL)
   .then(() => console.log("Database connected"))
   .catch(err => console.log("DB ERROR:", err.message))
@@ -23,45 +35,35 @@ mongoose.connect(process.env.MONGO_URL)
 app.post("/api/send", async (req, res) => {
   const { name, email, message } = req.body
 
-
   if (!name || !email || !message) {
     return res.status(400).json({ msg: "All fields required" })
   }
 
-  if (!email.includes("@")) {
-    return res.status(400).json({ msg: "Invalid email" })
-  }
-
-  if (message.length > 500) {
-    return res.status(400).json({ msg: "Message too long" })
-  }
-
   try {
-    
+   
     await Contact.create({ name, email, message })
 
+    
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
       auth: {
         user: process.env.EMAIL,
         pass: process.env.PASS,
       },
     })
 
+    
     await transporter.sendMail({
       from: process.env.EMAIL,
       to: process.env.EMAIL,
-      subject: `🚀 New Message from ${name}`,
+      subject: `New Message from ${name}`,
       html: `
-        <div style="font-family:Arial; padding:20px; background:#0a0a0a; color:#fff;">
-          <h2>🚀 New Portfolio Message</h2>
-          <p><b>Name:</b> ${name}</p>
-          <p><b>Email:</b> ${email}</p>
-          <p><b>Message:</b></p>
-          <div style="background:#111; padding:10px; border-radius:6px;">
-            ${message}
-          </div>
-        </div>
+        <h2>New Portfolio Message</h2>
+        <p><b>Name:</b> ${name}</p>
+        <p><b>Email:</b> ${email}</p>
+        <p><b>Message:</b> ${message}</p>
       `
     })
 
@@ -70,20 +72,13 @@ app.post("/api/send", async (req, res) => {
       from: process.env.EMAIL,
       to: email,
       subject: "Thanks for contacting me 🙌",
-      html: `
-        <div style="font-family:Arial; padding:20px;">
-          <h2>Hi ${name} 👋</h2>
-          <p>Thank you for reaching out! I have received your message and will get back to you soon.</p>
-          <br/>
-          <p>Best Regards,<br/>Gunjan Singh</p>
-        </div>
-      `
+      html: `<p>Hi ${name}, thanks for contacting. I’ll reply soon.</p>`
     })
 
-    res.status(200).json({ msg: "Message sent & saved ✅" })
+    res.status(200).json({ msg: "Message sent ✅" })
 
   } catch (error) {
-    console.log("❌ SERVER ERROR:", error.message)
+    console.log("❌ ERROR:", error.message)
     res.status(500).json({ msg: "Server error ❌" })
   }
 })
@@ -92,5 +87,5 @@ app.post("/api/send", async (req, res) => {
 const PORT = process.env.PORT || 5000
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
+  console.log(`Server running on ${PORT}`)
 })
