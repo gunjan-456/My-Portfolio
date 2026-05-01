@@ -1,4 +1,4 @@
-import profile from "../assets/profilePic.jpg"
+import profile from "../assets/profilePic.png"
 
 const Hero = () => {
   return (
@@ -65,3 +65,6 @@ const Hero = () => {
 }
 
 export default Hero
+
+
+

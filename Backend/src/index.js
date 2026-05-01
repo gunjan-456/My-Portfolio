@@ -87,6 +87,6 @@ app.post("/api/send", async (req, res) => {
   }
 })
 
-app.listen(5000, () => {
-  console.log("Server running on port 5000")
+app.listen(process.env.PORT, () => {
+  console.log(`Server connected on PORT ${process.env.PORT}`)
 })

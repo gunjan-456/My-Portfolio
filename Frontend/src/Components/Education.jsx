@@ -7,7 +7,7 @@ const educationData = [
   {
     degree: "12th",
     institute: "R B T Vidyalaya",
-    year: "2019"
+    year: "2018 - 2019"
   }
 ]
 
