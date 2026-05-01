@@ -8,19 +8,23 @@ const Contact = require("./Models/Contact")
 
 const app = express()
 
+
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://my-portfolio-rust-five-80.vercel.app/"
+  "https://my-portfolio-rust-five-80.vercel.app"
 ]
+
 
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true)
     } else {
+      console.log("❌ Blocked by CORS:", origin)
       callback(new Error("Not allowed by CORS"))
     }
-  }
+  },
+  methods: ["GET", "POST"]
 }))
 
 app.use(express.json())
@@ -49,12 +53,10 @@ app.post("/api/send", async (req, res) => {
       },
     })
 
-   
     await transporter.sendMail({
       from: `"Portfolio Contact" <${process.env.EMAIL}>`,
       to: process.env.EMAIL,
       subject: `🚀 New Message from ${name}`,
-
       html: `
       <div style="font-family: Arial, sans-serif; background:#0f172a; padding:20px;">
         
@@ -89,13 +91,10 @@ app.post("/api/send", async (req, res) => {
       `
     })
 
-
-  
     await transporter.sendMail({
       from: `"Gunjan Singh" <${process.env.EMAIL}>`,
       to: email,
       subject: "Thanks for contacting me 🙌",
-
       html: `
       <div style="font-family: Arial, sans-serif; background:#0f172a; padding:20px;">
         
