@@ -11,7 +11,7 @@ const app = express()
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://portfolioo-rho-gold.vercel.app"
+  "https://portfolioo-kc1u.vercel.app/"
 ]
 
 app.use(cors({
