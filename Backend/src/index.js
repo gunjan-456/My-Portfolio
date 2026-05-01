@@ -8,23 +8,27 @@ const Contact = require("./Models/Contact")
 
 const app = express()
 
-app.use(cors())
+
+app.use(cors({
+  origin: "*"
+}))
 app.use(express.json())
 
-
+/
 mongoose.connect(process.env.MONGO_URL)
   .then(() => console.log("Database connected"))
-  .catch(err => console.log(err))
+  .catch(err => console.log("DB ERROR:", err.message))
 
 
 app.post("/api/send", async (req, res) => {
   const { name, email, message } = req.body
 
+
   if (!name || !email || !message) {
     return res.status(400).json({ msg: "All fields required" })
   }
 
-   if (!email.includes("@")) {
+  if (!email.includes("@")) {
     return res.status(400).json({ msg: "Invalid email" })
   }
 
@@ -32,12 +36,10 @@ app.post("/api/send", async (req, res) => {
     return res.status(400).json({ msg: "Message too long" })
   }
 
-
   try {
-   
+    
     await Contact.create({ name, email, message })
 
-  
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -49,10 +51,10 @@ app.post("/api/send", async (req, res) => {
     await transporter.sendMail({
       from: process.env.EMAIL,
       to: process.env.EMAIL,
-      subject: ` New Message from ${name}`,
+      subject: `🚀 New Message from ${name}`,
       html: `
         <div style="font-family:Arial; padding:20px; background:#0a0a0a; color:#fff;">
-          <h2>New Portfolio Message</h2>
+          <h2>🚀 New Portfolio Message</h2>
           <p><b>Name:</b> ${name}</p>
           <p><b>Email:</b> ${email}</p>
           <p><b>Message:</b></p>
@@ -63,7 +65,7 @@ app.post("/api/send", async (req, res) => {
       `
     })
 
-    
+   
     await transporter.sendMail({
       from: process.env.EMAIL,
       to: email,
@@ -72,7 +74,6 @@ app.post("/api/send", async (req, res) => {
         <div style="font-family:Arial; padding:20px;">
           <h2>Hi ${name} 👋</h2>
           <p>Thank you for reaching out! I have received your message and will get back to you soon.</p>
-          <p>Meanwhile, you can explore my portfolio.</p>
           <br/>
           <p>Best Regards,<br/>Gunjan Singh</p>
         </div>
@@ -82,11 +83,14 @@ app.post("/api/send", async (req, res) => {
     res.status(200).json({ msg: "Message sent & saved ✅" })
 
   } catch (error) {
-    console.log(error)
+    console.log("❌ SERVER ERROR:", error.message)
     res.status(500).json({ msg: "Server error ❌" })
   }
 })
 
-app.listen(process.env.PORT, () => {
-  console.log(`Server connected on PORT ${process.env.PORT}`)
+
+const PORT = process.env.PORT || 5000
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
 })
