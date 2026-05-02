@@ -10,7 +10,7 @@ const app = express()
 
 const allowedOrigins = [
   "http://localhost:5173",
-  ": https://my-portfolio-utik.vercel.app"
+  "https://my-portfolio-utik.vercel.app"
 ]
 
 app.use(cors({
