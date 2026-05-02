@@ -10,7 +10,8 @@ const app = express()
 
 
 const allowedOrigins = [
-  "http://localhost:5173"
+  "http://localhost:5173",
+  "http://my-portfolio-zzs8.vercel.app/"
 ]
 
 
