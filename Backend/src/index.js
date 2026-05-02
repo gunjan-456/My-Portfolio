@@ -10,8 +10,7 @@ const app = express()
 
 
 const allowedOrigins = [
-  "http://localhost:5173",
-  "https://my-portfolio-rust-five-80.vercel.app"
+  "http://localhost:5173"
 ]
 
 
