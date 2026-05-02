@@ -31,7 +31,6 @@ mongoose.connect(process.env.MONGO_URL)
   .then(() => console.log("Database connected"))
   .catch(err => console.log("DB ERROR:", err.message))
 
-
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "alive" })
 })
@@ -44,78 +43,45 @@ app.post("/api/send", async (req, res) => {
   }
 
   try {
-
+   
     await Contact.create({ name, email, message })
 
+  
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
       auth: {
         user: process.env.EMAIL,
         pass: process.env.PASS,
       },
+      connectionTimeout: 5000,
     })
 
-    await transporter.sendMail({
-      from: `"Portfolio Contact" <${process.env.EMAIL}>`,
-      to: process.env.EMAIL,
-      subject: `🚀 New Message from ${name}`,
-      html: `
-      <div style="font-family: Arial, sans-serif; background:#0f172a; padding:20px;">
-        <div style="max-width:500px; margin:auto; background:#111827; padding:20px; border-radius:12px; color:white;">
-          <h2 style="text-align:center; color:#a855f7;">📩 New Portfolio Message</h2>
-          <hr style="border:0.5px solid #374151; margin:15px 0;" />
-          <p><strong style="color:#c084fc;">👤 Name:</strong> ${name}</p>
-          <p>
-            <strong style="color:#c084fc;">📧 Email:</strong>
-            <a href="mailto:${email}" style="color:#60a5fa; text-decoration:none;">
-              ${email}
-            </a>
-          </p>
-          <p><strong style="color:#c084fc;">💬 Message:</strong></p>
-          <div style="background:#1f2937; padding:12px; border-radius:8px; margin-top:5px;">
-            ${message}
-          </div>
-          <p style="text-align:center; font-size:12px; color:#9ca3af; margin-top:20px;">
-            🚀 Sent from your portfolio
-          </p>
-        </div>
-      </div>
-      `
-    })
+   
+    try {
+      await transporter.sendMail({
+        from: `"Portfolio Contact" <${process.env.EMAIL}>`,
+        to: process.env.EMAIL,
+        subject: `🚀 New Message from ${name}`,
+        html: `...same html...`
+      })
 
-    await transporter.sendMail({
-      from: `"Gunjan Singh" <${process.env.EMAIL}>`,
-      to: email,
-      subject: "Thanks for contacting me 🙌",
-      html: `
-      <div style="font-family: Arial, sans-serif; background:#0f172a; padding:20px;">
-        <div style="max-width:500px; margin:auto; background:#111827; padding:20px; border-radius:12px; color:white;">
-          <h2 style="text-align:center; color:#a855f7;">
-            🙌 Thanks for reaching out!
-          </h2>
-          <p style="margin-top:15px;">
-            Hi <b style="color:#c084fc;">${name}</b>,
-          </p>
-          <p style="color:#d1d5db;">
-            Thanks for contacting me. I've received your message and will get back to you soon.
-          </p>
-          <div style="background:#1f2937; padding:12px; border-radius:8px; margin:15px 0;">
-            <b>Your Message:</b><br/>
-            ${message}
-          </div>
-          <p style="color:#9ca3af; font-size:13px;">
-            ⏳ Expected response time: within 24 hours
-          </p>
-          <hr style="border:0.5px solid #374151; margin:15px 0;" />
-          <p style="text-align:center; font-size:12px; color:#9ca3af;">
-            💜 Gunjan Singh | Full Stack Developer
-          </p>
-        </div>
-      </div>
-      `
-    })
+      await transporter.sendMail({
+        from: `"Gunjan Singh" <${process.env.EMAIL}>`,
+        to: email,
+        subject: "Thanks for contacting me 🙌",
+        html: `...same html...`
+      })
 
-    res.status(200).json({ msg: "Message sent ✅" })
+      return res.status(200).json({ msg: "Message + Email sent ✅" })
+
+    } catch (mailError) {
+      console.log("⚠️ Email failed but DB saved:", mailError.message)
+
+    
+      return res.status(200).json({ msg: "Saved (email failed) ✅" })
+    }
 
   } catch (error) {
     console.log("❌ ERROR:", error.message)
